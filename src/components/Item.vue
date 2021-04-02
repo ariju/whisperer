@@ -1,41 +1,37 @@
 <template>
-  <div class="home">
-    <div class="list">
-      <Item
-        v-for="whisper in orderBy(whispers, 'date', -1)"
-        :key="whisper.id"
-        :id="whisper.id"
-        :uid="whisper.uid"
-      />
+  <li class="item">
+    <div class="user-box">
+      <div
+        class="avatar"
+        :style="'background-image: url(' + user.photoURL + ')'"
+      ></div>
+      <p class="user-name">{{ user.name }}</p>
     </div>
-  </div>
+    <div class="content" v-html="whisper.content"></div>
+  </li>
 </template>
 
 <script>
-import Item from "@/components/Item.vue";
 import { db } from "../main";
-import Vue2Filters from "vue2-filters";
 
 export default {
-  name: "Home",
+  props: ["id", "uid"],
   data() {
     return {
-      whispers: [],
+      whisper: {},
+      user: {},
     };
   },
   firestore() {
     return {
-      whispers: db.collection("whispers"),
+      whisper: db.collection("whispers").doc(this.$props.id),
+      user: db.collection("users").doc(this.$props.uid),
     };
   },
-  components: {
-    Item,
-  },
-  mixins: [Vue2Filters.mixin],
 };
 </script>
 
-<style lang="stylus" scoped>
+<style lang="stylus">
 .item
   list-style none
   border-top 1px solid #eee
