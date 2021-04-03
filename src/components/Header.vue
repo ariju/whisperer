@@ -4,37 +4,55 @@
       <h1>whisp.</h1>
     </router-link>
     <div class="btns">
-      <button @click="signIn">
-        <fa icon="user" />
-      </button>
+      <div v-if="currentUser" class="btns">
+        <button
+          :style="'background-image: url(' + currentUser.photoURL + ')'"
+        ></button>
+        <button>
+          <fa icon="sign-out-alt" @click="signOut" />
+        </button>
+      </div>
+      <div v-else class="btns">
+        <button>
+          <fa icon="user" @click="signIn" />
+        </button>
+      </div>
     </div>
   </header>
 </template>
 
 <script>
-import firebase from "firebase"
-import {auth} from "../main"
+import firebase from "firebase";
+import { auth } from "../main";
 
 export default {
+  data() {
+    return {
+      currentUser: {},
+    };
+  },
+  created() {
+    auth.onAuthStateChanged((user) => {
+      this.currentUser = user;
+    });
+  },
   methods: {
     signIn() {
       const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider)
-      .then((result) => {
-        alert("Hello,"+result.user.displayName+"!")
-      })
+      auth.signInWithPopup(provider).then((result) => {
+        alert("Hello," + result.user.displayName + "!");
+      });
     },
     signOut() {
-      if(window.confirm('Are You Sure to Sign Out?'))//メッセージとokとキャンセルボタン
-        auth.signOut()
-        .then(() => {
-          alert("You Safely Signed Out.")
-          this.$router.push('/'),
-          location.reload()//ページを再読み込み
-        })
-    }
-  }
-}
+      if (window.confirm("Are You Sure to Sign Out?"))
+        //メッセージとokとキャンセルボタン
+        auth.signOut().then(() => {
+          alert("You Safely Signed Out.");
+          this.$router.push("/"), location.reload(); //ページを再読み込み
+        });
+    },
+  },
+};
 </script>
 
 <style lang="stylus" scoped>
