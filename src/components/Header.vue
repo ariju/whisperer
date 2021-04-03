@@ -3,20 +3,20 @@
     <router-link to="/">
       <h1>whisp.</h1>
     </router-link>
-    <div class="btns">
-      <div v-if="currentUser" class="btns">
+    <div v-if="currentUser" class="btns">
+      <router-link :to="'/user/' + currentUser.uid">
         <button
           :style="'background-image: url(' + currentUser.photoURL + ')'"
         ></button>
-        <button>
-          <fa icon="sign-out-alt" @click="signOut" />
-        </button>
-      </div>
-      <div v-else class="btns">
-        <button>
-          <fa icon="user" @click="signIn" />
-        </button>
-      </div>
+      </router-link>
+      <button>
+        <fa icon="sign-out-alt" @click="signOut" />
+      </button>
+    </div>
+    <div v-else class="btns">
+      <button>
+        <fa icon="user" @click="signIn" />
+      </button>
     </div>
   </header>
 </template>
@@ -41,16 +41,22 @@ export default {
     signIn() {
       const provider = new firebase.auth.GoogleAuthProvider();
       auth.signInWithPopup(provider).then((result) => {
+        this.$router.push("/user/" + result.user.uid);
         alert("Hello," + result.user.displayName + "!");
-        this.createUser(result.user)//result.userにサインインしたユーザーのデータが入っている
+        this.createUser(result.user); //result.userにサインインしたユーザーのデータが入っている
       });
     },
     createUser(user) {
-      db.collection('users').doc(user.uid).set({
-        'name':user.displayName,
-        'photoURL':user.photoURL,
-        'email':user.email
-      },{ merge:true })
+      db.collection("users")
+        .doc(user.uid)
+        .set(
+          {
+            name: user.displayName,
+            photoURL: user.photoURL,
+            email: user.email,
+          },
+          { merge: true }
+        );
     },
     signOut() {
       if (window.confirm("Are You Sure to Sign Out?"))
