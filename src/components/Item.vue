@@ -8,11 +8,23 @@
       <p class="user-name">{{ user.name }}</p>
     </div>
     <div class="content" v-html="whisper.content"></div>
+    <button
+      v-if="currentUser && currentUser.uid == user.id"
+      @click="showBtns = !showBtns"
+    >
+      <fa icon="ellipsis-v" />
+    </button>
+    <div v-if="showBtns" class="controls">
+      <li @click="deleteWhisper" style="color: red">
+        delete
+      </li>
+    </div>
   </li>
 </template>
 
 <script>
 import { db } from "../main";
+import { auth } from "../main";
 
 export default {
   props: ["id", "uid"],
@@ -20,13 +32,29 @@ export default {
     return {
       whisper: {},
       user: {},
+      currentUser: {},
+      showBtns: false,
     };
+  },
+  created() {
+    auth.onAuthStateChanged((user) => {
+      this.currentUser = user;
+    });
   },
   firestore() {
     return {
       whisper: db.collection("whispers").doc(this.$props.id),
       user: db.collection("users").doc(this.$props.uid),
     };
+  },
+  methods: {
+    deleteWhisper() {
+      if (window.confirm("Are You Sure to Delete This Whisper?")) {
+        db.collection("whispers")
+          .doc(this.$props.id)
+          .delete();
+      }
+    },
   },
 };
 </script>
@@ -82,6 +110,38 @@ export default {
       font-size .7rem
       line-height .7rem
       width 50px
+  .content
+    padding 10px
+  button
+    position absolute
+    top 5px
+    right 0
+    background transparent
+    color #555
+    font-size .9rem
+    opacity 0
+    transition .2s
+  .controls
+    background white
+    position absolute
+    top 5px
+    right 35px
+    box-shadow 0 0 5px rgba(0,0,0,.05)
+    border-radius 3px
+    opacity 0
+    li
+      padding 5px 20px
+      border-top 1px solid #eee
+      cursor pointer
+      &:first-child
+        border none
+  &:first-child
+    border none
+  &:hover
+    background rgba(0,0,0,.02)
     .content
-      padding 10px
+    button
+      opacity 1
+    .controls
+      opacity 1
 </style>
